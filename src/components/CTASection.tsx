@@ -12,9 +12,9 @@ const CTASection = () => {
         </h3>
         <p className="text-sm text-muted-foreground mb-2">Não é de São José do Rio Preto? </p>
          <p className="text-sm text-muted-foreground mb-2">Não tem problema, pois enviamos para todo Brasil.</p>
-        <p className="text-sm text-muted-foreground mb-6">
+        {/* <p className="text-sm text-muted-foreground mb-6">
           Fale com nosso time de vendas e faça seu pedido
-        </p>
+        </p> */}
         <a
           href="https://wa.me/551199404244"
           target="_blank"

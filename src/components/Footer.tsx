@@ -10,8 +10,8 @@ const Footer = () => {
               <span className="text-primary font-bold text-lg">DL</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-primary-foreground leading-tight">DL Distribuidora</p>
-              <p className="text-xs text-primary-foreground/70 leading-tight">Produtos para Saúde</p>
+              <p className="text-sm font-bold text-primary-foreground leading-tight">LU TOXINAS</p>
+              <p className="text-xs text-primary-foreground/70 leading-tight">Produtos HOF</p>
             </div>
           </div>
 
@@ -26,7 +26,7 @@ const Footer = () => {
 
           <div className="text-center md:text-right">
             <p className="text-xs text-primary-foreground/70">© 2025 – Todos os direitos reservados</p>
-            <p className="text-xs text-primary-foreground/70">DL Distribuidora | Produtos para Saúde</p>
+            <p className="text-xs text-primary-foreground/70">LU TOXINAS | Produtos HOF</p>
           </div>
         </div>
       </div>

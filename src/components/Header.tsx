@@ -19,8 +19,8 @@ const Header = () => {
             <span className="text-primary-foreground font-bold text-lg">DL</span>
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-bold text-foreground leading-tight">DL Distribuidora</p>
-            <p className="text-xs text-muted-foreground leading-tight">Produtos para Saúde</p>
+            <p className="text-sm font-bold text-foreground leading-tight">LU TOXINAS</p>
+            <p className="text-xs text-muted-foreground leading-tight">Produtos HOF</p>
           </div>
         </a>
 

@@ -1,6 +1,6 @@
 import heroBg from "@/assets/hero-bg.jpg";
 
-const brands = ["LTHREAD", "SAYPHA", "BOTULIFT", "RADIESSE", "SCULPTRA"];
+const brands = ["LTHREAD", "SAYPHA", "BOTULIFT", "RADIESSE", "SCULPTRA", "RENNOVA", "NEURAMIS", "BOTOX", ];
 
 const HeroSection = () => {
   return (
@@ -15,7 +15,8 @@ const HeroSection = () => {
 
       <div className="relative z-10 container mx-auto px-4 py-16">
         <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight max-w-3xl mx-auto">
-          Produtos HOF para profissionais de estética. Pronta entrega para São José do Rio Preto, Mirassol e Bady Bassitt.
+          <p>Produtos HOF para profissionais de estética. </p> 
+          <p>Pronta entrega para São José do Rio Preto, Mirassol e Bady Bassitt.</p>
         </h1>
         <p className="mt-4 text-sm md:text-base text-primary-foreground/80 max-w-xl mx-auto">
           Somos distribuidores das melhores marcas do mercado
