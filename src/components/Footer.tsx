@@ -1,0 +1,37 @@
+import { Instagram, Facebook } from "lucide-react";
+
+const Footer = () => {
+  return (
+    <footer className="bg-primary py-10">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-primary-foreground flex items-center justify-center">
+              <span className="text-primary font-bold text-lg">DL</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-primary-foreground leading-tight">DL Distribuidora</p>
+              <p className="text-xs text-primary-foreground/70 leading-tight">Produtos para Saúde</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs text-primary-foreground/70">
+            <a href="#" className="flex items-center gap-1 hover:text-primary-foreground transition-colors">
+              <Instagram size={14} /> Instagram
+            </a>
+            <a href="#" className="flex items-center gap-1 hover:text-primary-foreground transition-colors">
+              <Facebook size={14} /> Facebook
+            </a>
+          </div>
+
+          <div className="text-center md:text-right">
+            <p className="text-xs text-primary-foreground/70">© 2025 – Todos os direitos reservados</p>
+            <p className="text-xs text-primary-foreground/70">DL Distribuidora | Produtos para Saúde</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
