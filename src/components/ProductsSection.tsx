@@ -7,29 +7,25 @@ import productSkinbooster from "@/assets/product-skinbooster.jpg";
 const products = [
   {
     name: "Toxina Botulínica",
-    description: "Marcas líderes de importação, garantindo um resultado seguro e previsível para cada perfil de paciente.",
+    description: "Atenua as linhas de expressão, harmoniza os traços faciais e oferece um efeito seguro, personalizado e com precisão para cada perfil individual.",
     image: productToxina,
   },
   {
     name: "Bioestimuladores",
-    description: "Estimule a produção de colágeno de forma natural e prolongada para uma pele mais firme e uniforme.",
+    description: "Ativam a produção de colágeno de forma natural, promovendo um rejuvenescimento gradual e contribuindo para uma pele mais firme e elástica.",
     image: productBioestimulador,
   },
   {
     name: "Preenchedores",
-    description: "Marcas líderes de importação, indicados para volumização e harmonização com segurança comprovada.",
+    description: "Suavizam marcas de expressão, restauram o volume perdido e realçam os contornos do rosto, entregando uma aparência equilibrada e naturalmente rejuvenescida.",
     image: productPreenchedor,
   },
   {
     name: "Fios de PDO",
-    description: "Tecnologia de bioestimulação, sustentação e rejuvenescimento em fios absorvíveis de alta qualidade.",
+    description: "Proporcionam efeito lifting instantâneo e estimulam o colágeno de forma progressiva, promovendo firmeza e redefinindo os contornos faciais.",
     image: productFios,
   },
-  {
-    name: "Skinbooster",
-    description: "Promove a hidratação profunda e revitalização da pele, estimulando a elasticidade e a luminosidade.",
-    image: productSkinbooster,
-  },
+ 
 ];
 
 const ProductsSection = () => {
@@ -40,7 +36,7 @@ const ProductsSection = () => {
 
       <div className="relative z-10 container mx-auto px-4">
         <h2 className="text-xl md:text-2xl font-bold text-primary-foreground text-center mb-12">
-          Nossas principais linhas de produtos
+          Nossos principais produtos
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
