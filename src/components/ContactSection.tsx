@@ -23,20 +23,17 @@ const ContactSection = () => {
           <div className="space-y-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-3">
               <Phone size={16} className="text-primary shrink-0" />
-              <span>Telefone/WhatsApp: (11) 94252-1852</span>
+              <span>Telefone/WhatsApp: (11) 99146-3008</span>
             </div>
-            <div className="flex items-center gap-3">
-              <MapPin size={16} className="text-primary shrink-0" />
-              <span>Alameda Terracota, 185 – Conj 707, Bairro Cerâmica – São Caetano do Sul/SP</span>
-            </div>
+            
             <div className="flex items-center gap-3">
               <Clock size={16} className="text-primary shrink-0" />
-              <span>Segunda a Sexta das 09h às 18h</span>
+              <span>Atendimento de Segunda a Sexta das 08h às 17h</span>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <Mail size={16} className="text-primary shrink-0" />
               <span>sac@distribuidoradl.com.br</span>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -53,7 +50,7 @@ const ContactSection = () => {
             />
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-lg font-bold text-foreground mb-4">Envie-nos uma mensagem</h3>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -105,7 +102,7 @@ const ContactSection = () => {
                 Enviar ✉
               </button>
             </form>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
