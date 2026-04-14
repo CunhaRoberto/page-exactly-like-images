@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import nabota from "@/assets/nabota.jpg";
 import botox from "@/assets/botox.jpg";
