@@ -37,7 +37,7 @@ const HeroSection = () => {
           href="#produtos"
           className="mt-8 inline-block bg-primary-foreground text-primary font-semibold text-sm px-6 py-3 rounded-md hover:bg-primary-foreground/90 transition-colors"
         >
-          Nossos Produtos
+          Produtos
         </a>
       </div>
     </section>
