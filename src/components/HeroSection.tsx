@@ -1,4 +1,4 @@
-import heroBg from "@/assets/hero-bg.jpg";
+import banner from "@/assets/banner.jpg";
 
 const brands = ["LTHREAD", "SAYPHA", "BOTULIFT", "RADIESSE", "SCULPTRA", "RENNOVA", "NEURAMIS", "BOTOX", ];
 
@@ -9,8 +9,8 @@ const HeroSection = () => {
       className="relative min-h-[500px] flex items-center justify-center text-center pt-20"
     >
       <div className="absolute inset-0">
-        <img src={heroBg} alt="Clínica estética" className="w-full h-full object-cover" width={1920} height={768} />
-        <div className="absolute inset-0 bg-primary/85" />
+        <img src={banner} alt="banner" className="w-full h-full object-cover" width={2500} height={768} />
+        {/* <div className="absolute inset-0 bg-primary/85" /> */}
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-16">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Início", href: "#inicio" },
@@ -16,7 +17,7 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between py-3 px-4">
         <a href="#inicio" className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">DL</span>
+           <img src={logo} alt="logo" className="w-full h-full object-cover" width={1920} height={768} />
           </div>
           <div className="hidden sm:block">
             <p className="text-sm font-bold text-foreground leading-tight">LU TOXINAS</p>

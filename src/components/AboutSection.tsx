@@ -1,4 +1,4 @@
-import heroTreatment from "@/assets/hero-treatment.jpg";
+import marcas from "@/assets/marcas.jpg";
 
 const stats = [
   { value: "+10", label: "Anos de Mercado" },
@@ -14,7 +14,7 @@ const AboutSection = () => {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center">
             <img
-              src={heroTreatment}
+              src={marcas}
               alt="Tratamento estético"
               className="rounded-lg shadow-lg max-w-sm w-full object-cover"
               loading="lazy"
