@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import productToxina from "@/assets/product-toxina.jpg";
+import nabota from "@/assets/nabota.jpg";
+import botox from "@/assets/botox.jpg";
 import productPreenchedor from "@/assets/product-preenchedor.jpg";
 import productBioestimulador from "@/assets/product-bioestimulador.jpg";
 import productFios from "@/assets/product-fios.jpg";
@@ -9,7 +10,7 @@ const products = [
   {
     name: "Toxina Botulínica",
     description: "Atenua as linhas de expressão, harmoniza os traços faciais e oferece um efeito seguro, personalizado e com precisão para cada perfil individual.",
-    images: [productToxina],
+    images: [nabota,botox],
   },
   {
     name: "Bioestimuladores",
