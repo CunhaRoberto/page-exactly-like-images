@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import nabota from "@/assets/nabota.jpg";
 import botox from "@/assets/botox.jpg";
@@ -32,6 +32,14 @@ const products = [
 const ProductCardCarousel = ({ images, name }: { images: string[]; name: string }) => {
   const [current, setCurrent] = useState(0);
   const hasMultiple = images.length > 1;
+
+  useEffect(() => {
+    if (!hasMultiple) return;
+    const timer = setInterval(() => {
+      setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [hasMultiple, images.length]);
 
   const prev = () => setCurrent((c) => (c === 0 ? images.length - 1 : c - 1));
   const next = () => setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
