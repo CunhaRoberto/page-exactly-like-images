@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import nabota from "@/assets/nabota.jpg";
-import botox from "@/assets/botox.jpg";
-import xeomin from "@/assets/xeomin.jpg";
-import letybo from "@/assets/letybo.jpg";
-import botulift from "@/assets/botulift.jpg";
-import dysport from "@/assets/dysport.jpg";
-import productPreenchedor from "@/assets/product-preenchedor.jpg";
-import productBioestimulador from "@/assets/product-bioestimulador.jpg";
+import nabota from "@/assets/toxinas/nabota.jpg";
+import botox from "@/assets/toxinas/botox.jpg";
+import xeomin from "@/assets/toxinas/xeomin.jpg";
+import letybo from "@/assets/toxinas/letybo.jpg";
+import botulift from "@/assets/toxinas/botulift.jpg";
+import dysport from "@/assets/toxinas/dysport.jpg";
+import biogelis from "@/assets/preenchedores/biogelis.jpg";
+
+import elleva150 from "@/assets/bioestimuladores/ellva150.jpg";
+import elleva210   from "@/assets/bioestimuladores/elleva210.jpg";
+import radiesse from "@/assets/bioestimuladores/radiesse.jpg";
+import sculptra from "@/assets/bioestimuladores/sculptra.jpg";
 import productFios from "@/assets/product-fios.jpg";
 
 const products = [
@@ -19,12 +23,12 @@ const products = [
   {
     name: "Bioestimuladores",
     description: "Ativam a produção de colágeno de forma natural, promovendo um rejuvenescimento gradual e contribuindo para uma pele mais firme e elástica.",
-    images: [productBioestimulador],
+    images: [elleva150, elleva210, radiesse, sculptra],
   },
   {
     name: "Preenchedores",
     description: "Suavizam marcas de expressão, restauram o volume perdido e realçam os contornos do rosto, entregando uma aparência equilibrada e naturalmente rejuvenescida.",
-    images: [productPreenchedor],
+    images: [biogelis],
   },
   {
     name: "Fios de PDO",
@@ -111,16 +115,23 @@ const ProductsSection = () => {
                 <h3 className="font-bold text-sm text-foreground mb-1">{product.name}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed mb-3">{product.description}</p>
                 <a
-                  href="#contato"
+                 href="https://wa.me/5517992071482"
                   className="inline-block bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded hover:bg-primary-light transition-colors"
                 >
-                  Saiba Mais
+                  Eu quero!
                 </a>
               </div>
+
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-background/80 to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" /> 
+            
             </div>
+            
           ))}
         </div>
+        
       </div>
+
+
     </section>
   );
 };
