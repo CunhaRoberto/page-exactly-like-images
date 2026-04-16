@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MessageCircle } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import nabota from "@/assets/toxinas/nabota.jpg";
 import botox from "@/assets/toxinas/botox.jpg";
