@@ -129,7 +129,18 @@ const ProductsSection = () => {
             
           ))}
         </div>
-        
+
+        <div className="flex justify-center mt-10">
+          <a
+            href="https://wa.me/5517992071482"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-primary-foreground text-primary font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <MessageCircle size={20} />
+            Fale com um consultor
+          </a>
+        </div>
       </div>
 
 
