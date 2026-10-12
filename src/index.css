@@ -1,77 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-headline: "Playfair Display", Georgia, serif;
+  --font-body: "Nunito Sans", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 210 50% 10%;
+  --color-primary: #45655a;
+  --color-primary-container: #87a99c;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #1e3e34;
+  --color-primary-fixed: #c7eadc;
+  --color-primary-fixed-dim: #abcec0;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 50% 10%;
+  --color-secondary: #874e4f;
+  --color-secondary-container: #fdb4b3;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #7a4344;
+  --color-secondary-fixed: #ffdad9;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 50% 10%;
+  --color-tertiary: #7a5826;
+  --color-tertiary-container: #c49a62;
+  --color-tertiary-fixed: #ffddb4;
+  --color-tertiary-fixed-dim: #ecbf84;
 
-    --primary: 207 78% 20%;
-    --primary-foreground: 0 0% 100%;
+  --color-sage-soft: #DCE7E2;
+  --color-sage-deep: #4A6E60;
+  --color-blush-soft: #FBE6E6;
+  --color-blush-deep: #8F4E4E;
+  --color-waffle-gold-light: #F5E9D7;
 
-    --primary-light: 207 60% 35%;
+  --color-surface: #fbf9f5;
+  --color-surface-cream: #FDFBF7;
+  --color-surface-card: #FFFFFF;
+  --color-surface-container: #efeeea;
+  --color-surface-container-low: #f5f3ef;
+  --color-surface-container-high: #eae8e4;
+  --color-surface-container-highest: #e4e2de;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 207 78% 20%;
-
-    --muted: 210 20% 96%;
-    --muted-foreground: 210 10% 50%;
-
-    --accent: 207 78% 20%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 207 78% 20%;
-
-    --radius: 0.5rem;
-
-    --hero-overlay: 207 78% 15%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  --color-text-main: #262220;
+  --color-text-muted: #6E6762;
+  --color-border-subtle: #EBE5DB;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+body {
+  font-family: var(--font-body);
+  background-color: #fbf9f5;
+  color: #1b1c1a;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
 
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-headline {
+  font-family: var(--font-headline);
+}
+
+/* Material symbol custom alignment */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-block;
+}
+
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c8c4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #717975;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
-  }
-}
-
-@layer utilities {
-  .section-curve {
-    clip-path: ellipse(80% 100% at 50% 100%);
-  }
-
-  .section-curve-top {
-    clip-path: ellipse(80% 100% at 50% 0%);
+    background: white !important;
+    color: black !important;
   }
 }

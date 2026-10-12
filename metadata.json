@@ -1,0 +1,6 @@
+{
+  "name": "Memory Cream - Back-Office & Eventos",
+  "description": "Sistema integrado da Memory Cream: site institucional, CRM de orçamentos, montador de propostas comerciais com folha A4 executiva, financeiro e contratos digitais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
