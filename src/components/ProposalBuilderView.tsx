@@ -17,6 +17,23 @@ interface ProposalBuilderViewProps {
   }) => void;
 }
 
+const getPricing = () => {
+  try {
+    const saved = localStorage.getItem('mc_settings');
+    if (saved) {
+      const s = JSON.parse(saved);
+      return {
+        bike: Number(s.bikePrice) || 3200,
+        station: Number(s.stationPrice) || 2400,
+        extraHour: Number(s.extraHourPrice) || 380
+      };
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return { bike: 3200, station: 2400, extraHour: 380 };
+};
+
 export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
   leads,
   currentLeadId,
@@ -47,13 +64,16 @@ export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
       setStructure(activeLead.structure);
       setGuests(activeLead.guestCount);
     }
-  }, [activeLead]);
+  }, [activeLead?.id]);
 
-  // Calculations
-  const baseStructurePrice = structure === 'bike' ? 3200 : 2400;
+  // Calculations (base prices come from Configurações, saved locally)
+  const pricing = getPricing();
+  const baseStructurePrice = structure === 'bike' ? pricing.bike : pricing.station;
   // Extra guest surcharge if > 150 pax
   const extraGuestsFee = guests > 150 ? (guests - 150) * 12 : 0;
-  const subtotal = baseStructurePrice + extraGuestsFee;
+  // Extra hours beyond the 4h base
+  const extraHoursFee = hours > 4 ? (hours - 4) * pricing.extraHour : 0;
+  const subtotal = baseStructurePrice + extraGuestsFee + extraHoursFee;
   const discountAmount = Math.round((subtotal * discountPercent) / 100);
   const totalValue = subtotal + freight - discountAmount;
   const signalValue = Math.round(totalValue * 0.3);
