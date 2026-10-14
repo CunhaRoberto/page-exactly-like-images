@@ -354,59 +354,38 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
               <h2 className="font-headline font-bold text-xl text-[#262220]">
-                Fluxo de Caixa Semanal
+                Situação dos Lançamentos
               </h2>
               <p className="text-[13px] text-[#6E6762]">
-                Recebimentos liquidados vs. previsões de encerramento contratual
+                Valores por situação de cada lançamento cadastrado
               </p>
             </div>
-            <div className="flex items-center gap-3 text-[12px] font-semibold">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#45655a]" />
-                Entradas Efetivadas
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#ecbf84]" />
-                A Vencer
-              </span>
-            </div>
-          </div>
-
-          {/* SVG Bar Graph */}
-          <div className="w-full h-52 pt-2">
-            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 540 180">
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="30" y2="30" />
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="80" y2="80" />
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="130" y2="130" />
-
-              {/* Week 1 */}
-              <rect fill="#45655a" height="95" rx="5" width="28" x="50" y="55" />
-              <rect fill="#ecbf84" height="55" rx="5" width="28" x="84" y="95" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="81" y="168">Semana 1</text>
-
-              {/* Week 2 */}
-              <rect fill="#45655a" height="115" rx="5" width="28" x="175" y="35" />
-              <rect fill="#ecbf84" height="45" rx="5" width="28" x="209" y="105" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="206" y="168">Semana 2</text>
-
-              {/* Week 3 (Current Peak) */}
-              <rect fill="#45655a" height="130" rx="5" width="28" x="300" y="20" />
-              <rect fill="#ecbf84" height="80" rx="5" width="28" x="334" y="70" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="331" y="168">Semana 3 (Atual)</text>
-
-              {/* Week 4 */}
-              <rect fill="#45655a" height="90" rx="5" width="28" x="425" y="60" />
-              <rect fill="#ecbf84" height="105" rx="5" width="28" x="459" y="45" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="456" y="168">Semana 4</text>
-            </svg>
+          {/* Derived status breakdown */}
+          <div className="flex flex-col gap-3 pt-2 pb-2">
+            {stats.statusRows.map((row) => (
+              <div key={row.key} className="flex items-center gap-3">
+                <span className="text-[12px] font-bold text-[#6E6762] w-44 shrink-0">
+                  {row.label}
+                </span>
+                <div className="flex-1 h-5 bg-[#FDFBF7] border border-[#EBE5DB] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${row.color}`}
+                    style={{ width: `${Math.max((row.value / stats.maxStatus) * 100, 2)}%` }}
+                  />
+                </div>
+                <span className="text-[12px] font-bold text-[#262220] w-32 text-right shrink-0">
+                  R$ {fmtBRL(row.value)}
+                </span>
+              </div>
+            ))}
           </div>
 
           <div className="flex items-center justify-between bg-[#FDFBF7] border border-[#EBE5DB] px-3.5 py-2.5 rounded-xl mt-2">
             <span className="text-[12px] text-[#6E6762]">
-              Pico de liquidação nos dias que antecedem casamentos (Sexta & Sábado)
+              Barra proporcional ao total por situação
             </span>
             <span className="text-[11px] text-[#4A6E60] font-bold">
-              Saúde Financeira: Excelente
+              A receber: R$ {fmtBRL(stats.toReceive)}
             </span>
           </div>
         </div>
@@ -432,43 +411,43 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" fill="transparent" r="40" stroke="#F5F3EF" strokeWidth="16" />
-                {/* PIX 55% */}
+                {/* PIX */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#45655a"
-                  strokeDasharray="138.16 251.2"
+                  strokeDasharray={`${(stats.pixPct * 2.512).toFixed(2)} 251.2`}
                   strokeDashoffset="0"
                   strokeWidth="16"
                 />
-                {/* Cartão 35% */}
+                {/* Cartão */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#c49a62"
-                  strokeDasharray="87.92 251.2"
-                  strokeDashoffset="-138.16"
+                  strokeDasharray={`${(stats.cartaoPct * 2.512).toFixed(2)} 251.2`}
+                  strokeDashoffset={`-${(stats.pixPct * 2.512).toFixed(2)}`}
                   strokeWidth="16"
                 />
-                {/* Boleto 10% */}
+                {/* Boleto */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#874e4f"
-                  strokeDasharray="25.12 251.2"
-                  strokeDashoffset="-226.08"
+                  strokeDasharray={`${(stats.boletoPct * 2.512).toFixed(2)} 251.2`}
+                  strokeDashoffset={`-${((stats.pixPct + stats.cartaoPct) * 2.512).toFixed(2)}`}
                   strokeWidth="16"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="font-headline text-2xl font-bold text-[#262220] leading-none">
-                  55%
+                  {stats.pixPct}%
                 </span>
                 <span className="text-[10px] text-[#6E6762] uppercase font-bold">PIX</span>
               </div>
@@ -482,8 +461,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">PIX Instantâneo</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">55%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 26.812,50</span>
+                  <span className="font-bold text-[#262220]">{stats.pixPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('pix'))}</span>
                 </div>
               </div>
 
@@ -493,8 +472,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">Cartão de Crédito</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">35%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 17.062,50</span>
+                  <span className="font-bold text-[#262220]">{stats.cartaoPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('cartao'))}</span>
                 </div>
               </div>
 
@@ -504,8 +483,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">Boleto Faturado</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">10%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 4.875,00</span>
+                  <span className="font-bold text-[#262220]">{stats.boletoPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('boleto'))}</span>
                 </div>
               </div>
             </div>
@@ -513,7 +492,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
 
           <div className="pt-2 text-center border-t border-[#EBE5DB]/50">
             <span className="text-[11px] text-[#6E6762]">
-              Taxa de conciliação bancária: <strong>100% atualizada</strong> via Open Finance
+              Percentuais calculados a partir dos lançamentos cadastrados
             </span>
           </div>
         </div>
