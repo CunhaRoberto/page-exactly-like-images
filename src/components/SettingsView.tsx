@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
 import { ALL_FLAVORS } from '../data/initialData';
 
+const SETTINGS_KEY = 'mc_settings';
+
+const loadSavedSettings = (): Record<string, unknown> | null => {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+};
+
 export const SettingsView: React.FC = () => {
+  const saved = loadSavedSettings();
   const [companyName, setCompanyName] = useState(
-    'Memory Cream Eventos e Gelatos Ltda.'
+    (saved?.companyName as string) || 'Memory Cream Eventos e Gelatos Ltda.'
   );
-  const [cnpj, setCnpj] = useState('45.192.839/0001-92');
-  const [phone, setPhone] = useState('(11) 98765-4321');
-  const [email, setEmail] = useState('contato@memorycream.com.br');
+  const [cnpj, setCnpj] = useState((saved?.cnpj as string) || '45.192.839/0001-92');
+  const [phone, setPhone] = useState((saved?.phone as string) || '(11) 98765-4321');
+  const [email, setEmail] = useState((saved?.email as string) || 'contato@memorycream.com.br');
   const [address, setAddress] = useState(
-    'Av. dos Bandeirantes, 1240, São Paulo/SP'
+    (saved?.address as string) || 'Av. dos Bandeirantes, 1240, São Paulo/SP'
   );
-  const [bikePrice, setBikePrice] = useState(3200);
-  const [stationPrice, setStationPrice] = useState(2400);
-  const [extraHourPrice, setExtraHourPrice] = useState(380);
+  const [bikePrice, setBikePrice] = useState(Number(saved?.bikePrice) || 3200);
+  const [stationPrice, setStationPrice] = useState(Number(saved?.stationPrice) || 2400);
+  const [extraHourPrice, setExtraHourPrice] = useState(Number(saved?.extraHourPrice) || 380);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -23,7 +36,24 @@ export const SettingsView: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    showToast('Configurações salvas e aplicadas em todos os módulos!');
+    try {
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({
+          companyName,
+          cnpj,
+          phone,
+          email,
+          address,
+          bikePrice,
+          stationPrice,
+          extraHourPrice
+        })
+      );
+    } catch (err) {
+      console.error(err);
+    }
+    showToast('Configurações salvas! Os preços já valem no Gerador de Propostas.');
   };
 
   return (

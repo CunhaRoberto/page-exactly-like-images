@@ -24,19 +24,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [modelSelect, setModelSelect] = useState('Estação com Bike Retrô');
   const [cepLocation, setCepLocation] = useState('');
   const [observations, setObservations] = useState('');
+  const [veganRequested, setVeganRequested] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newId = 'lead-' + Date.now();
-    const parsedPax = guestCount.includes('50')
-      ? 50
-      : guestCount.includes('100')
-      ? 100
-      : guestCount.includes('200')
-      ? 180
-      : guestCount.includes('350')
-      ? 280
-      : 200;
+    const paxByRange: Record<string, number> = {
+      'Até 50 pessoas': 50,
+      '50 a 100 pessoas': 100,
+      '100 a 200 pessoas': 200,
+      '200 a 350 pessoas': 350,
+      'Acima de 350 pessoas': 400
+    };
+    const parsedPax = paxByRange[guestCount] ?? 100;
 
     const newLead: Lead = {
       id: newId,
@@ -52,13 +52,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       phone: phone,
       email: email,
       notes: observations,
-      preferredFlavors: [
-        'Morango Silvestre Cremoso',
-        'Frutas Vermelhas (0% Lactose)',
-        'Uva Niágara da Serra',
-        'Chiclete Nostalgia'
-      ],
-      veganRequested: true,
+      preferredFlavors: [],
+      veganRequested,
       receivedAt: 'Agora pelo site',
       avatarText: fullName.substring(0, 2).toUpperCase(),
       avatarColor: 'bg-[#87a99c] text-[#1e3e34]',
@@ -842,6 +837,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       />
                     </div>
                   </div>
+
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={veganRequested}
+                      onChange={(e) => setVeganRequested(e.target.checked)}
+                      className="w-4 h-4 accent-[#45655a]"
+                    />
+                    <span className="text-[13px] font-bold text-[#262220]">
+                      Preciso de opções veganas / sem lactose
+                    </span>
+                  </label>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-[13px] font-bold text-[#262220]">

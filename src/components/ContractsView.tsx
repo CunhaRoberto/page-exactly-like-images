@@ -33,6 +33,14 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
   const activeContract =
     contracts.find((c) => c.id === selectedContractId) || contracts[0];
 
+  const openCount = contracts.filter(
+    (c) => c.status === 'pendente' || c.status === 'aguardando'
+  ).length;
+  const awaitingSignatureCount = contracts.filter((c) => !c.clientSigned).length;
+  const signedValidCount = contracts.filter(
+    (c) => c.status === 'assinado' || c.status === 'registrado'
+  ).length;
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -175,7 +183,7 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
               </span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="font-display text-4xl text-[#262220] leading-none font-bold">
-                  06
+                  {String(openCount).padStart(2, '0')}
                 </span>
                 <span className="text-[11px] text-[#4A6E60] font-bold flex items-center">
                   <span className="material-symbols-outlined text-[14px]">
@@ -200,7 +208,7 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
               </span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="font-display text-4xl text-[#874e4f] leading-none font-bold">
-                  04
+                  {String(awaitingSignatureCount).padStart(2, '0')}
                 </span>
                 <span className="text-[11px] text-[#8F4E4E] font-bold flex items-center">
                   <span className="material-symbols-outlined text-[14px]">
@@ -225,7 +233,7 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
               </span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="font-display text-4xl text-[#45655a] leading-none font-bold">
-                  52
+                  {String(signedValidCount).padStart(2, '0')}
                 </span>
                 <span className="text-[11px] text-[#45655a] font-bold flex items-center">
                   <span className="material-symbols-outlined text-[14px]">
@@ -285,7 +293,7 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
                 }`}
               >
                 Pendentes (
-                {contracts.filter((c) => !c.clientSigned).length}
+                {openCount}
                 )
               </button>
               <button
@@ -297,7 +305,7 @@ export const ContractsView: React.FC<ContractsViewProps> = ({
                 }`}
               >
                 Válidos (
-                {contracts.filter((c) => c.clientSigned).length}
+                {signedValidCount}
                 )
               </button>
             </div>

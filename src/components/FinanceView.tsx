@@ -9,8 +9,7 @@ interface FinanceViewProps {
 
 export const FinanceView: React.FC<FinanceViewProps> = ({
   payments,
-  onUpdatePayment,
-  onAddPayment
+  onUpdatePayment
 }) => {
   const [filterType, setFilterType] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -57,6 +56,63 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
     });
   }, [payments, searchQuery, filterType]);
 
+  const fmtBRL = (n: number) =>
+    n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const parseBRL = (s: string) => {
+    const n = Number(s.replace(/\./g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const stats = useMemo(() => {
+    const isSettled = (s: PaymentItem['liquidationStatus']) =>
+      s === 'quitado' || s === 'pago';
+    const settled = payments.filter((p) => isSettled(p.liquidationStatus));
+    const open = payments.filter((p) => !isSettled(p.liquidationStatus));
+    const received = settled.reduce((sum, p) => sum + p.totalValue, 0);
+    const toReceive = open.reduce((sum, p) => sum + p.balanceValue, 0);
+    const deposits = payments.reduce((sum, p) => sum + (p.totalValue - p.balanceValue), 0);
+    const settlementPct = payments.length
+      ? Math.round((settled.length / payments.length) * 100)
+      : 0;
+    const byMethod = (m: PaymentItem['method']) =>
+      payments.filter((p) => p.method === m).reduce((sum, p) => sum + p.totalValue, 0);
+    const methodTotal = payments.reduce((sum, p) => sum + p.totalValue, 0) || 1;
+    let pixPct = Math.round((byMethod('pix') / methodTotal) * 100);
+    let cartaoPct = Math.round((byMethod('cartao') / methodTotal) * 100);
+    let boletoPct = 100 - pixPct - cartaoPct;
+    if (boletoPct < 0) {
+      cartaoPct += boletoPct;
+      boletoPct = 0;
+    }
+    const statusRows = [
+      { key: 'quitado', label: 'Quitados (sinal + saldo)', color: 'bg-[#45655a]' },
+      { key: 'pago', label: 'Pagos via boleto / NF', color: 'bg-[#4A6E60]' },
+      { key: 'aguardando', label: 'Aguardando liquidação', color: 'bg-[#ecbf84]' },
+      { key: 'pendente_parcela', label: 'Parcelas em aberto', color: 'bg-[#c49a62]' }
+    ].map((row) => ({
+      ...row,
+      value: payments
+        .filter((p) => p.liquidationStatus === row.key)
+        .reduce((sum, p) => sum + p.totalValue, 0)
+    }));
+    const maxStatus = Math.max(...statusRows.map((r) => r.value), 1);
+    return {
+      received,
+      toReceive,
+      deposits,
+      settlementPct,
+      openCount: open.length,
+      settledCount: settled.length,
+      byMethod,
+      pixPct,
+      cartaoPct,
+      boletoPct,
+      statusRows,
+      maxStatus
+    };
+  }, [payments]);
+
   const handleOpenBaixa = (item: PaymentItem) => {
     setSelectedPayId(item.id);
     setPayAmount(
@@ -70,7 +126,24 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const target = payments.find((p) => p.id === selectedPayId);
-    if (target) {
+    if (!target) {
+      showToast('Selecione um lançamento válido antes de registrar a baixa.');
+      return;
+    }
+    const paid = parseBRL(payAmount);
+    const remaining = Math.max(0, Math.round((target.balanceValue - paid) * 100) / 100);
+    if (remaining > 0) {
+      const updated: PaymentItem = {
+        ...target,
+        balanceValue: remaining,
+        signalStatusDesc: `Pagamento parcial de R$ ${fmtBRL(paid)} via ${payMethod.toUpperCase()} em ${payDate}`,
+        authCode: authNote
+      };
+      onUpdatePayment(updated);
+      showToast(
+        `Pagamento parcial de R$ ${fmtBRL(paid)} registrado para ${target.clientName}. Saldo restante: R$ ${fmtBRL(remaining)}.`
+      );
+    } else {
       const updated: PaymentItem = {
         ...target,
         balanceValue: 0,
@@ -81,29 +154,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
       };
       onUpdatePayment(updated);
       showToast(
-        `Baixa confirmada! Saldo de R$ ${payAmount} liquidado para ${target.clientName}.`
+        `Baixa confirmada! Saldo de R$ ${fmtBRL(paid)} liquidado para ${target.clientName}.`
       );
-    } else {
-      const newItem: PaymentItem = {
-        id: 'pay-' + Date.now(),
-        clientName: 'Contratante Avulso',
-        clientInitials: 'CA',
-        clientColor: 'bg-[#FBE6E6] text-[#8F4E4E]',
-        eventName: 'Evento Adicional',
-        eventDate: payDate,
-        packageType: 'Estação Gourmet de Gelato',
-        totalValue: Number(payAmount.replace(',', '.')),
-        signalDesc: '100% Pago Integral',
-        signalStatusDesc: `Liquidado via ${payMethod.toUpperCase()}`,
-        balanceValue: 0,
-        balanceDueDate: 'Quitado',
-        liquidationStatus: 'quitado',
-        method: payMethod,
-        category: 'social',
-        authCode: authNote
-      };
-      onAddPayment(newItem);
-      showToast(`Pagamento avulso de R$ ${payAmount} registrado com sucesso!`);
     }
     setIsModalOpen(false);
   };
@@ -201,7 +253,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                 Faturamento do Mês
               </span>
               <div className="font-headline text-2xl font-bold text-[#262220] mt-1">
-                R$ 48.750<span className="text-sm font-normal text-[#6E6762]">,00</span>
+                R$ {fmtBRL(stats.received)}
               </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#c7eadc] flex items-center justify-center text-[#1e3e34]">
@@ -210,9 +262,9 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
           </div>
           <div className="flex items-center justify-between mt-4 pt-2 border-t border-[#EBE5DB]/50">
             <div className="flex items-center gap-1 text-[#4A6E60] text-[12px] font-bold">
-              <span className="material-symbols-outlined text-[16px]">north_east</span>
-              <span>+18%</span>
-              <span className="text-[#6E6762] font-normal ml-0.5">vs. mês anterior</span>
+              <span className="material-symbols-outlined text-[16px]">task_alt</span>
+              <span>{stats.settledCount} de {payments.length}</span>
+              <span className="text-[#6E6762] font-normal ml-0.5">lançamentos quitados</span>
             </div>
             {/* Sparkline */}
             <svg className="w-16 h-5 text-[#87a99c]" fill="none" viewBox="0 0 80 24">
@@ -235,7 +287,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                 A Receber (Próx. 30 dias)
               </span>
               <div className="font-headline text-2xl font-bold text-[#262220] mt-1">
-                R$ 21.400<span className="text-sm font-normal text-[#6E6762]">,00</span>
+                R$ {fmtBRL(stats.toReceive)}
               </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#F5E9D7] flex items-center justify-center text-[#7a5826]">
@@ -243,7 +295,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             </div>
           </div>
           <div className="flex items-center justify-between mt-4 pt-2 border-t border-[#EBE5DB]/50">
-            <span className="text-[12px] text-[#6E6762]">9 contratos com saldo</span>
+            <span className="text-[12px] text-[#6E6762]">{stats.openCount} lançamentos com saldo</span>
             <span className="px-2 py-0.5 rounded-full bg-[#F5E9D7] text-[#7a5826] text-[10px] font-bold">
               Previsão Normal
             </span>
@@ -258,7 +310,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                 Sinais & Entradas Pagas
               </span>
               <div className="font-headline text-2xl font-bold text-[#262220] mt-1">
-                R$ 14.800<span className="text-sm font-normal text-[#6E6762]">,00</span>
+                R$ {fmtBRL(stats.deposits)}
               </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#DCE7E2] flex items-center justify-center text-[#4A6E60]">
@@ -267,7 +319,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
           </div>
           <div className="flex items-center justify-between mt-4 pt-2 border-t border-[#EBE5DB]/50">
             <span className="text-[12px] text-[#6E6762]">Datas 100% reservadas</span>
-            <span className="text-[12px] text-[#45655a] font-bold">12 novos contratos</span>
+            <span className="text-[12px] text-[#45655a] font-bold">{payments.length} lançamentos no período</span>
           </div>
         </div>
 
@@ -279,7 +331,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                 Eventos 100% Quitados
               </span>
               <div className="font-headline text-2xl font-bold text-[#262220] mt-1">
-                34 <span className="text-sm font-normal text-[#6E6762]">eventos</span>
+                {stats.settledCount} <span className="text-sm font-normal text-[#6E6762]">eventos</span>
               </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#ffdad9] flex items-center justify-center text-[#874e4f]">
@@ -287,9 +339,9 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             </div>
           </div>
           <div className="flex items-center justify-between mt-4 pt-2 border-t border-[#EBE5DB]/50">
-            <span className="text-[12px] text-[#6E6762]">79% da meta operacional</span>
+            <span className="text-[12px] text-[#6E6762]">{stats.settlementPct}% da carteira quitada</span>
             <div className="w-20 bg-[#eae8e4] rounded-full h-2 overflow-hidden">
-              <div className="bg-[#45655a] h-full rounded-full" style={{ width: '79%' }} />
+              <div className="bg-[#45655a] h-full rounded-full" style={{ width: `${stats.settlementPct}%` }} />
             </div>
           </div>
         </div>
@@ -302,59 +354,38 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
               <h2 className="font-headline font-bold text-xl text-[#262220]">
-                Fluxo de Caixa Semanal
+                Situação dos Lançamentos
               </h2>
               <p className="text-[13px] text-[#6E6762]">
-                Recebimentos liquidados vs. previsões de encerramento contratual
+                Valores por situação de cada lançamento cadastrado
               </p>
             </div>
-            <div className="flex items-center gap-3 text-[12px] font-semibold">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#45655a]" />
-                Entradas Efetivadas
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#ecbf84]" />
-                A Vencer
-              </span>
-            </div>
-          </div>
-
-          {/* SVG Bar Graph */}
-          <div className="w-full h-52 pt-2">
-            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 540 180">
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="30" y2="30" />
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="80" y2="80" />
-              <line stroke="#EBE5DB" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="540" y1="130" y2="130" />
-
-              {/* Week 1 */}
-              <rect fill="#45655a" height="95" rx="5" width="28" x="50" y="55" />
-              <rect fill="#ecbf84" height="55" rx="5" width="28" x="84" y="95" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="81" y="168">Semana 1</text>
-
-              {/* Week 2 */}
-              <rect fill="#45655a" height="115" rx="5" width="28" x="175" y="35" />
-              <rect fill="#ecbf84" height="45" rx="5" width="28" x="209" y="105" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="206" y="168">Semana 2</text>
-
-              {/* Week 3 (Current Peak) */}
-              <rect fill="#45655a" height="130" rx="5" width="28" x="300" y="20" />
-              <rect fill="#ecbf84" height="80" rx="5" width="28" x="334" y="70" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="331" y="168">Semana 3 (Atual)</text>
-
-              {/* Week 4 */}
-              <rect fill="#45655a" height="90" rx="5" width="28" x="425" y="60" />
-              <rect fill="#ecbf84" height="105" rx="5" width="28" x="459" y="45" />
-              <text fill="#6E6762" fontSize="12" textAnchor="middle" x="456" y="168">Semana 4</text>
-            </svg>
+          {/* Derived status breakdown */}
+          <div className="flex flex-col gap-3 pt-2 pb-2">
+            {stats.statusRows.map((row) => (
+              <div key={row.key} className="flex items-center gap-3">
+                <span className="text-[12px] font-bold text-[#6E6762] w-44 shrink-0">
+                  {row.label}
+                </span>
+                <div className="flex-1 h-5 bg-[#FDFBF7] border border-[#EBE5DB] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${row.color}`}
+                    style={{ width: `${Math.max((row.value / stats.maxStatus) * 100, 2)}%` }}
+                  />
+                </div>
+                <span className="text-[12px] font-bold text-[#262220] w-32 text-right shrink-0">
+                  R$ {fmtBRL(row.value)}
+                </span>
+              </div>
+            ))}
           </div>
 
           <div className="flex items-center justify-between bg-[#FDFBF7] border border-[#EBE5DB] px-3.5 py-2.5 rounded-xl mt-2">
             <span className="text-[12px] text-[#6E6762]">
-              Pico de liquidação nos dias que antecedem casamentos (Sexta & Sábado)
+              Barra proporcional ao total por situação
             </span>
             <span className="text-[11px] text-[#4A6E60] font-bold">
-              Saúde Financeira: Excelente
+              A receber: R$ {fmtBRL(stats.toReceive)}
             </span>
           </div>
         </div>
@@ -380,43 +411,43 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
             <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" fill="transparent" r="40" stroke="#F5F3EF" strokeWidth="16" />
-                {/* PIX 55% */}
+                {/* PIX */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#45655a"
-                  strokeDasharray="138.16 251.2"
+                  strokeDasharray={`${(stats.pixPct * 2.512).toFixed(2)} 251.2`}
                   strokeDashoffset="0"
                   strokeWidth="16"
                 />
-                {/* Cartão 35% */}
+                {/* Cartão */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#c49a62"
-                  strokeDasharray="87.92 251.2"
-                  strokeDashoffset="-138.16"
+                  strokeDasharray={`${(stats.cartaoPct * 2.512).toFixed(2)} 251.2`}
+                  strokeDashoffset={`-${(stats.pixPct * 2.512).toFixed(2)}`}
                   strokeWidth="16"
                 />
-                {/* Boleto 10% */}
+                {/* Boleto */}
                 <circle
                   cx="50"
                   cy="50"
                   fill="transparent"
                   r="40"
                   stroke="#874e4f"
-                  strokeDasharray="25.12 251.2"
-                  strokeDashoffset="-226.08"
+                  strokeDasharray={`${(stats.boletoPct * 2.512).toFixed(2)} 251.2`}
+                  strokeDashoffset={`-${((stats.pixPct + stats.cartaoPct) * 2.512).toFixed(2)}`}
                   strokeWidth="16"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="font-headline text-2xl font-bold text-[#262220] leading-none">
-                  55%
+                  {stats.pixPct}%
                 </span>
                 <span className="text-[10px] text-[#6E6762] uppercase font-bold">PIX</span>
               </div>
@@ -430,8 +461,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">PIX Instantâneo</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">55%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 26.812,50</span>
+                  <span className="font-bold text-[#262220]">{stats.pixPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('pix'))}</span>
                 </div>
               </div>
 
@@ -441,8 +472,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">Cartão de Crédito</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">35%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 17.062,50</span>
+                  <span className="font-bold text-[#262220]">{stats.cartaoPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('cartao'))}</span>
                 </div>
               </div>
 
@@ -452,8 +483,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                   <span className="font-bold text-[#262220]">Boleto Faturado</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-[#262220]">10%</span>
-                  <span className="text-[11px] text-[#6E6762] block">R$ 4.875,00</span>
+                  <span className="font-bold text-[#262220]">{stats.boletoPct}%</span>
+                  <span className="text-[11px] text-[#6E6762] block">R$ {fmtBRL(stats.byMethod('boleto'))}</span>
                 </div>
               </div>
             </div>
@@ -461,7 +492,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
 
           <div className="pt-2 text-center border-t border-[#EBE5DB]/50">
             <span className="text-[11px] text-[#6E6762]">
-              Taxa de conciliação bancária: <strong>100% atualizada</strong> via Open Finance
+              Percentuais calculados a partir dos lançamentos cadastrados
             </span>
           </div>
         </div>
