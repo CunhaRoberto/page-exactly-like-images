@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { Json } from '@/integrations/supabase/types';
+import { supabase } from '../integrations/supabase/client';
+import type { Json } from '../integrations/supabase/types';
 import { ContractItem, Lead, PaymentItem } from '../types';
 import { INITIAL_CONTRACTS, INITIAL_LEADS, INITIAL_PAYMENTS } from '../data/initialData';
 
