@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Lead } from '../types';
+import { getCachedSettings } from '../lib/db';
 
 interface ProposalBuilderViewProps {
   leads: Lead[];
@@ -18,20 +19,12 @@ interface ProposalBuilderViewProps {
 }
 
 const getPricing = () => {
-  try {
-    const saved = localStorage.getItem('mc_settings');
-    if (saved) {
-      const s = JSON.parse(saved);
-      return {
-        bike: Number(s.bikePrice) || 3200,
-        station: Number(s.stationPrice) || 2400,
-        extraHour: Number(s.extraHourPrice) || 380
-      };
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return { bike: 3200, station: 2400, extraHour: 380 };
+  const s = getCachedSettings();
+  return {
+    bike: Number(s.bikePrice) || 3200,
+    station: Number(s.stationPrice) || 2400,
+    extraHour: Number(s.extraHourPrice) || 380
+  };
 };
 
 export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
