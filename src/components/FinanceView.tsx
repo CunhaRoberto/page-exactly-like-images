@@ -360,6 +360,8 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
                 Valores por situação de cada lançamento cadastrado
               </p>
             </div>
+          </div>
+
           {/* Derived status breakdown */}
           <div className="flex flex-col gap-3 pt-2 pb-2">
             {stats.statusRows.map((row) => (
