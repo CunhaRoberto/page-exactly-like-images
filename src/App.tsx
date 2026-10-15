@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { HeaderNav } from './components/HeaderNav';
 import { CrmLeadsView } from './components/CrmLeadsView';
@@ -8,71 +8,69 @@ import { ContractsView } from './components/ContractsView';
 import { SettingsView } from './components/SettingsView';
 import { LandingPage } from './components/LandingPage';
 import { Lead, PaymentItem, ContractItem } from './types';
-import { INITIAL_LEADS, INITIAL_PAYMENTS, INITIAL_CONTRACTS } from './data/initialData';
+import { loadBackofficeData, saveContracts, saveLeads, savePayments } from './lib/db';
 
 export default function App() {
-  // State for Leads
-  const [leads, setLeads] = useState<Lead[]>(() => {
-    try {
-      const saved = localStorage.getItem('mc_leads');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_LEADS;
-  });
-
-  // State for Payments
-  const [payments, setPayments] = useState<PaymentItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('mc_payments');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_PAYMENTS;
-  });
-
-  // State for Contracts
-  const [contracts, setContracts] = useState<ContractItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('mc_contracts');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_CONTRACTS;
-  });
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [payments, setPayments] = useState<PaymentItem[]>([]);
+  const [contracts, setContracts] = useState<ContractItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const loadedRef = useRef(false);
 
   // Active view tab: 'landing' or 'leads-crm' | 'gerador-proposta' | 'financeiro-pagamentos' | 'contratos-assinaturas' | 'configuracoes'
   const [currentTab, setCurrentTab] = useState<string>('leads-crm');
-  const [selectedLeadId, setSelectedLeadId] = useState<string>(leads[0]?.id || 'mariana');
+  const [selectedLeadId, setSelectedLeadId] = useState<string>('mariana');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync with LocalStorage
+  // Carrega os dados guardados no banco (Lovable Cloud)
+  const loadAll = React.useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    loadBackofficeData()
+      .then((data) => {
+        setLeads(data.leads);
+        setPayments(data.payments);
+        setContracts(data.contracts);
+        setSelectedLeadId(data.leads[0]?.id || 'mariana');
+        loadedRef.current = true;
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setLoadError('Não foi possível abrir seus dados agora. Verifique sua conexão com a internet e tente de novo.');
+        setLoading(false);
+      });
+  }, []);
+
   useEffect(() => {
-    try {
-      localStorage.setItem('mc_leads', JSON.stringify(leads));
-    } catch (e) {
+    loadAll();
+  }, [loadAll]);
+
+  // Salva no banco sempre que a lista mudar
+  useEffect(() => {
+    if (!loadedRef.current) return;
+    saveLeads(leads).catch((e) => {
       console.error(e);
-    }
+      showToast('Não foi possível salvar os leads no servidor.');
+    });
   }, [leads]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('mc_payments', JSON.stringify(payments));
-    } catch (e) {
+    if (!loadedRef.current) return;
+    savePayments(payments).catch((e) => {
       console.error(e);
-    }
+      showToast('Não foi possível salvar os pagamentos no servidor.');
+    });
   }, [payments]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('mc_contracts', JSON.stringify(contracts));
-    } catch (e) {
+    if (!loadedRef.current) return;
+    saveContracts(contracts).catch((e) => {
       console.error(e);
-    }
+      showToast('Não foi possível salvar os contratos no servidor.');
+    });
   }, [contracts]);
 
   const showToast = (msg: string) => {
