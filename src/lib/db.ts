@@ -42,6 +42,25 @@ function writeLocal(key: string, value: unknown) {
   }
 }
 
+// A migracao dos dados que estavam salvos no navegador roda uma unica vez por computador.
+const MIGRATION_FLAG = 'mc_cloud_migrated_v1';
+
+function hasMigrated(): boolean {
+  try {
+    return localStorage.getItem(MIGRATION_FLAG) === 'true';
+  } catch (e) {
+    return true;
+  }
+}
+
+function markMigrated() {
+  try {
+    localStorage.setItem(MIGRATION_FLAG, 'true');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 async function fetchRows(table: string): Promise<AnyRow[]> {
   const { data, error } = await supabase
     .from(table as any)
@@ -313,11 +332,47 @@ export interface BackofficeData {
 }
 
 export async function loadBackofficeData(): Promise<BackofficeData> {
-  const [leads, payments, contracts] = await Promise.all([
+  let [leads, payments, contracts] = await Promise.all([
     loadLeads(),
     loadPayments(),
     loadContracts()
   ]);
   await loadSettings();
+
+  // 1ª vez neste computador: traz para o banco o que ainda so existia no navegador.
+  if (!hasMigrated()) {
+    const localLeads = readLocal<Lead[]>('mc_leads') ?? [];
+    const localPayments = readLocal<PaymentItem[]>('mc_payments') ?? [];
+    const localContracts = readLocal<ContractItem[]>('mc_contracts') ?? [];
+    const localSettings = readLocal<Record<string, unknown>>('mc_settings');
+
+    const knownLeads = new Set(leads.map((l) => l.id));
+    const missingLeads = localLeads.filter((l) => !knownLeads.has(l.id));
+    if (missingLeads.length) {
+      leads = [...missingLeads, ...leads];
+      await saveLeads(leads);
+    }
+
+    const knownPayments = new Set(payments.map((p) => p.id));
+    const missingPayments = localPayments.filter((p) => !knownPayments.has(p.id));
+    if (missingPayments.length) {
+      payments = [...missingPayments, ...payments];
+      await savePayments(payments);
+    }
+
+    const knownContracts = new Set(contracts.map((c) => c.id));
+    const missingContracts = localContracts.filter((c) => !knownContracts.has(c.id));
+    if (missingContracts.length) {
+      contracts = [...missingContracts, ...contracts];
+      await saveContracts(contracts);
+    }
+
+    if (localSettings && Object.keys(localSettings).length) {
+      await saveSettings(localSettings);
+    }
+
+    markMigrated();
+  }
+
   return { leads, payments, contracts };
 }
