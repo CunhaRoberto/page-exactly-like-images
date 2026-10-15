@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { ALL_FLAVORS } from '../data/initialData';
-
-const SETTINGS_KEY = 'mc_settings';
+import { getCachedSettings, saveSettings } from '../lib/db';
 
 const loadSavedSettings = (): Record<string, unknown> | null => {
-  try {
-    const saved = localStorage.getItem(SETTINGS_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error(e);
-  }
-  return null;
+  const cached = getCachedSettings();
+  return Object.keys(cached).length ? cached : null;
 };
 
 export const SettingsView: React.FC = () => {
@@ -36,24 +30,21 @@ export const SettingsView: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      localStorage.setItem(
-        SETTINGS_KEY,
-        JSON.stringify({
-          companyName,
-          cnpj,
-          phone,
-          email,
-          address,
-          bikePrice,
-          stationPrice,
-          extraHourPrice
-        })
-      );
-    } catch (err) {
-      console.error(err);
-    }
-    showToast('Configurações salvas! Os preços já valem no Gerador de Propostas.');
+    saveSettings({
+      companyName,
+      cnpj,
+      phone,
+      email,
+      address,
+      bikePrice,
+      stationPrice,
+      extraHourPrice
+    })
+      .then(() => showToast('Configurações salvas! Os preços já valem no Gerador de Propostas.'))
+      .catch((err) => {
+        console.error(err);
+        showToast('Não foi possível salvar as configurações. Tente de novo.');
+      });
   };
 
   return (
