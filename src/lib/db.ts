@@ -332,6 +332,16 @@ export interface BackofficeData {
 }
 
 export async function loadBackofficeData(): Promise<BackofficeData> {
+  // Guarda o que existe no navegador ANTES de qualquer leitura do banco.
+  const localSnapshot = hasMigrated()
+    ? null
+    : {
+        leads: readLocal<Lead[]>('mc_leads') ?? [],
+        payments: readLocal<PaymentItem[]>('mc_payments') ?? [],
+        contracts: readLocal<ContractItem[]>('mc_contracts') ?? [],
+        settings: readLocal<Record<string, unknown>>('mc_settings')
+      };
+
   let [leads, payments, contracts] = await Promise.all([
     loadLeads(),
     loadPayments(),
@@ -340,11 +350,11 @@ export async function loadBackofficeData(): Promise<BackofficeData> {
   await loadSettings();
 
   // 1ª vez neste computador: traz para o banco o que ainda so existia no navegador.
-  if (!hasMigrated()) {
-    const localLeads = readLocal<Lead[]>('mc_leads') ?? [];
-    const localPayments = readLocal<PaymentItem[]>('mc_payments') ?? [];
-    const localContracts = readLocal<ContractItem[]>('mc_contracts') ?? [];
-    const localSettings = readLocal<Record<string, unknown>>('mc_settings');
+  if (!hasMigrated() && localSnapshot) {
+    const localLeads = localSnapshot.leads;
+    const localPayments = localSnapshot.payments;
+    const localContracts = localSnapshot.contracts;
+    const localSettings = localSnapshot.settings;
 
     const knownLeads = new Set(leads.map((l) => l.id));
     const missingLeads = localLeads.filter((l) => !knownLeads.has(l.id));
