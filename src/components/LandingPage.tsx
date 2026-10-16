@@ -4,7 +4,7 @@ import { LOGO_URL } from './Sidebar';
 
 interface LandingPageProps {
   onOpenAdmin: () => void;
-  onAddLeadFromWebsite: (newLead: Lead) => void;
+  onAddLeadFromWebsite: (newLead: Lead) => Promise<void>;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -13,6 +13,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -26,8 +28,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [observations, setObservations] = useState('');
   const [veganRequested, setVeganRequested] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
     const newId = 'lead-' + Date.now();
     const paxByRange: Record<string, number> = {
       'Até 50 pessoas': 50,
@@ -66,9 +71,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       proposalAmount: modelSelect.includes('Bike') ? 3200 : 2400
     };
 
-    onAddLeadFromWebsite(newLead);
-    setSubmittedLeadId(newId);
-    setFormSubmitted(true);
+    try {
+      await onAddLeadFromWebsite(newLead);
+      setSubmittedLeadId(newId);
+      setFormSubmitted(true);
+    } catch {
+      setSubmitError('Não foi possível enviar seu pedido. Seus dados continuam preenchidos; tente novamente.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const scrollToQuote = (modelName?: string) => {
@@ -864,12 +875,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
 
                   <div className="pt-2">
+                    {submitError && <p role="alert" className="text-destructive mb-3">{submitError}</p>}
                     <button
                       className="w-full py-4 px-6 bg-[#fdb4b3] text-[#360d10] hover:bg-[#874e4f] hover:text-white font-headline font-bold text-lg rounded-full shadow-md transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
                       type="submit"
+                      disabled={submitting}
                     >
                       <span className="material-symbols-outlined text-[24px]">send</span>
-                      <span>Enviar Pedido de Orçamento</span>
+                      <span>{submitting ? 'Enviando pedido…' : 'Enviar Pedido de Orçamento'}</span>
                     </button>
                     <p className="text-[12px] text-[#6E6762] text-center mt-2 flex items-center justify-center gap-1">
                       <span className="material-symbols-outlined text-[16px] text-[#4A6E60]">
