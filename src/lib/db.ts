@@ -67,8 +67,11 @@ async function fetchRows(table: string): Promise<AnyRow[]> {
     .select('*')
     .order('position', { ascending: true });
   if (error) throw error;
+  knownIds.set(table, new Set((data ?? []).map((row: AnyRow) => row.id as string)));
   return (data ?? []) as AnyRow[];
 }
+
+const knownIds = new Map<string, Set<string>>();
 
 /** Grava a lista completa no banco, preservando a ordem exibida na tela. */
 async function syncRows(table: string, rows: AnyRow[], keepIds: string[]) {
@@ -76,14 +79,14 @@ async function syncRows(table: string, rows: AnyRow[], keepIds: string[]) {
     const { error } = await supabase.from(table as any).upsert(rows, { onConflict: 'id' });
     if (error) throw error;
   }
-  const { data, error: selectError } = await supabase.from(table as any).select('id');
-  if (selectError) throw selectError;
   const keep = new Set(keepIds);
-  const toDelete = ((data ?? []) as AnyRow[]).map((r) => r.id as string).filter((id) => !keep.has(id));
+  // Não apaga cadastros recebidos em outro computador após a leitura desta tela.
+  const toDelete = [...(knownIds.get(table) ?? [])].filter((id) => !keep.has(id));
   if (toDelete.length) {
     const { error: deleteError } = await supabase.from(table as any).delete().in('id', toDelete);
     if (deleteError) throw deleteError;
   }
+  knownIds.set(table, keep);
 }
 
 // ---------- Leads ----------
@@ -147,6 +150,11 @@ export async function saveLeads(leads: Lead[]) {
     leads.map((lead, i) => leadToRow(lead, i)),
     leads.map((lead) => lead.id)
   );
+}
+
+export async function addLead(lead: Lead): Promise<void> {
+  const { error } = await supabase.from('mc_leads').insert(leadToRow(lead, -Date.now()) as any);
+  if (error) throw error;
 }
 
 export async function loadLeads(): Promise<Lead[]> {

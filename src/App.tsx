@@ -8,7 +8,7 @@ import { ContractsView } from './components/ContractsView';
 import { SettingsView } from './components/SettingsView';
 import { LandingPage } from './components/LandingPage';
 import { Lead, PaymentItem, ContractItem } from './types';
-import { loadBackofficeData, saveContracts, saveLeads, savePayments } from './lib/db';
+import { addLead, loadBackofficeData, loadLeads, saveContracts, saveLeads, savePayments } from './lib/db';
 
 export default function App() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -92,8 +92,9 @@ export default function App() {
     showToast(`Novo lead "${newLead.name}" cadastrado!`);
   };
 
-  const handleAddLeadFromWebsite = (newLead: Lead) => {
-    setLeads((prev) => [newLead, ...prev]);
+  const handleAddLeadFromWebsite = async (newLead: Lead) => {
+    await addLead(newLead);
+    setLeads((prev) => prev.some((lead) => lead.id === newLead.id) ? prev : [newLead, ...prev]);
     setSelectedLeadId(newLead.id);
     showToast(`Novo pedido de orçamento recebido do site: ${newLead.name}!`);
   };
@@ -257,7 +258,10 @@ export default function App() {
         </div>
 
         <LandingPage
-          onOpenAdmin={() => setCurrentTab('leads-crm')}
+          onOpenAdmin={() => {
+            loadLeads().then(setLeads).catch(() => showToast('Não foi possível atualizar a lista. Tente novamente.'));
+            setCurrentTab('leads-crm');
+          }}
           onAddLeadFromWebsite={handleAddLeadFromWebsite}
         />
 
