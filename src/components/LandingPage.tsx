@@ -875,7 +875,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
 
                   <div className="pt-2">
-                    {submitError && <p role="alert" className="text-destructive mb-3">{submitError}</p>}
+                    {submitError && <p role="alert" className="text-secondary mb-3">{submitError}</p>}
                     <button
                       className="w-full py-4 px-6 bg-[#fdb4b3] text-[#360d10] hover:bg-[#874e4f] hover:text-white font-headline font-bold text-lg rounded-full shadow-md transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
                       type="submit"

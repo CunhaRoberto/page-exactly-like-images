@@ -153,7 +153,7 @@ export async function saveLeads(leads: Lead[]) {
 }
 
 export async function addLead(lead: Lead): Promise<void> {
-  const { error } = await supabase.from('mc_leads').insert(leadToRow(lead, -Date.now()) as any);
+  const { error } = await supabase.from('mc_leads').insert(leadToRow(lead, 0) as any);
   if (error) throw error;
 }
 
