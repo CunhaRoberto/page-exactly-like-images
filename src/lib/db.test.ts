@@ -1,8 +1,17 @@
+/// <reference types="bun" />
 import { beforeEach, expect, mock, test } from 'bun:test';
 import { INITIAL_LEADS } from '../data/initialData';
 
 let rows: Record<string, any>[] = [];
 let insertError: unknown = null;
+Object.defineProperty(globalThis, 'localStorage', { value: {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+  clear: () => {},
+  key: () => null,
+  length: 0
+}, configurable: true });
 mock.module('../integrations/supabase/client', () => ({
   supabase: {
     from: () => ({
