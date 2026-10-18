@@ -1,9 +1,8 @@
-/// <reference types="bun" />
 import { beforeEach, expect, mock, test } from 'bun:test';
 import { INITIAL_LEADS } from '../data/initialData';
 
-let rows: Record<string, any>[] = [];
-let insertError: unknown = null;
+let rows = [];
+let insertError = null;
 Object.defineProperty(globalThis, 'localStorage', { value: {
   getItem: () => null,
   setItem: () => {},
@@ -16,18 +15,18 @@ mock.module('../integrations/supabase/client', () => ({
   supabase: {
     from: () => ({
       select: () => ({ order: async () => ({ data: [...rows], error: null }) }),
-      insert: async (row: Record<string, any>) => {
+      insert: async (row) => {
         if (insertError) return { error: insertError };
         rows.push(row);
         return { error: null };
       },
-      upsert: async (incoming: Record<string, any>[]) => {
+      upsert: async (incoming) => {
         for (const row of incoming) {
           rows = [...rows.filter((existing) => existing.id !== row.id), row];
         }
         return { error: null };
       },
-      delete: () => ({ in: async (_column: string, ids: string[]) => {
+      delete: () => ({ in: async (_column, ids) => {
         rows = rows.filter((row) => !ids.includes(row.id));
         return { error: null };
       } })
