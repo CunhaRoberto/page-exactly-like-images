@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Lead } from '../types';
 import { getCachedSettings } from '../lib/db';
+import { createProposalPdf, downloadProposalPdf } from '../lib/proposalPdf';
 
 interface ProposalBuilderViewProps {
   leads: Lead[];
@@ -50,6 +51,9 @@ export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
   const [discountPercent, setDiscountPercent] = useState<number>(5);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isGeneratingContract, setIsGeneratingContract] = useState(false);
+  const proposalSheetRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [preparedPdf, setPreparedPdf] = useState<Blob | null>(null);
 
   // Sync state when active lead changes
   useEffect(() => {
@@ -72,6 +76,36 @@ export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
   const signalValue = Math.round(totalValue * 0.3);
   const balanceValue = totalValue - signalValue;
   const staffCount = guests > 200 ? 3 : 2;
+
+  useEffect(() => {
+    setPreparedPdf(null);
+  }, [activeLead, structure, guests, hours, freight, discountPercent, totalValue]);
+
+  const handleDownloadPdf = async () => {
+    const sheet = proposalSheetRef.current;
+    if (!sheet || isGeneratingPdf) return;
+    const filename = `Proposta-Memory-Cream-${(activeLead?.name || 'cliente').replace(/[^\p{L}\p{N}]+/gu, '-')}.pdf`;
+    if (preparedPdf) {
+      downloadProposalPdf(preparedPdf, filename);
+      return;
+    }
+    setIsGeneratingPdf(true);
+    try {
+      const blob = await createProposalPdf(sheet);
+      setPreparedPdf(blob);
+      if (window.matchMedia('(pointer: coarse)').matches) {
+        showToast('PDF pronto. Toque em Baixar PDF para salvar.');
+      } else {
+        downloadProposalPdf(blob, filename);
+        showToast('Proposta em PDF gerada com sucesso.');
+      }
+    } catch (error) {
+      console.error('Falha ao gerar proposta em PDF', error);
+      showToast('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -692,18 +726,19 @@ export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
                 <span className="material-symbols-outlined text-[18px]">send</span>
               </a>
               <button
-                onClick={() => window.print()}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#45655a] text-white hover:bg-[#4A6E60] text-[12px] font-bold shadow-sm transition-all"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-on-primary hover:bg-sage-deep text-[12px] font-bold shadow-sm transition-all disabled:opacity-50"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">download</span>
-                <span>Baixar PDF</span>
+                <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Baixar PDF'}</span>
               </button>
             </div>
           </div>
 
           {/* A4 Sheet Simulation Canvas */}
-          <div className="bg-white border border-[#EBE5DB] rounded-2xl shadow-xl overflow-hidden relative">
+          <div ref={proposalSheetRef} className="bg-white border border-[#EBE5DB] rounded-2xl shadow-xl overflow-hidden relative">
             {/* Top Accent Strip */}
             <div className="h-2 bg-gradient-to-r from-[#45655a] via-[#87a99c] to-[#874e4f]" />
 
@@ -897,7 +932,7 @@ export const ProposalBuilderView: React.FC<ProposalBuilderViewProps> = ({
             </div>
 
             {/* Bottom Proposal Action */}
-            <div className="p-4 bg-[#efeeea] border-t border-[#EBE5DB] flex items-center justify-between">
+            <div data-pdf-exclude className="p-4 bg-[#efeeea] border-t border-[#EBE5DB] flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-[11px] text-[#6E6762]">Pronto para formalizar?</span>
                 <span className="text-[13px] text-[#262220] font-bold">

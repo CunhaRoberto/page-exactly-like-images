@@ -1,5 +1,7 @@
 # Project Rules
 
+- Proposal PDFs capture only the executive sheet and fit it as a single A4 page; keep editor controls out of exports. Why: downloaded proposals must match the configured preview without exposing panel controls or splitting sections.
+
 - Panel data (leads, payments, contracts, settings) lives in the `mc_*` tables of Lovable Cloud and is read/written only through `src/lib/db.ts`; browser storage is kept solely as a cache and as a one-time migration source for records that existed before the backend. Why: every computer must show the same records, not a per-browser copy.
 - The one-time browser-to-database migration runs once per computer (flag `mc_cloud_migrated_v1`) and must snapshot browser values before any database read, so stored values are never overwritten by seed defaults.
 - `tsconfig.json` includes only `src`, keeping the Deno edge-function helpers under `supabase/functions` out of the app typecheck, because they rely on Deno globals.
