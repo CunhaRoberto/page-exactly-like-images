@@ -124,7 +124,7 @@ export async function saveLeads(leads: Lead[]) {
   writeLocal('leads', leads);
 }
 export async function addLead(lead: Lead): Promise<void> {
-  const { error } = await supabase.from('leads').upsert(leadToRow(lead) as any, { onConflict: 'id' });
+  const { error } = await supabase.from('leads' as any).upsert(leadToRow(lead) as any, { onConflict: 'id' });
   if (error) throw error;
   const local = readLocal<Lead[]>('leads') ?? [];
   writeLocal('leads', [lead, ...local.filter((item) => item.id !== lead.id)]);
