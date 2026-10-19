@@ -21,7 +21,8 @@ mock.module('../integrations/supabase/client', () => ({
         return { error: null };
       },
       upsert: async (incoming) => {
-        for (const row of incoming) {
+        if (insertError) return { error: insertError };
+        for (const row of Array.isArray(incoming) ? incoming : [incoming]) {
           rows = [...rows.filter((existing) => existing.id !== row.id), row];
         }
         return { error: null };
