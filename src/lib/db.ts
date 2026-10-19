@@ -144,23 +144,23 @@ const rowToLead = (row: AnyRow): Lead => ({
 });
 
 export async function saveLeads(leads: Lead[]) {
-  writeLocal('mc_leads', leads);
+  writeLocal('leads', leads);
   await syncRows(
-    'mc_leads',
+    'leads',
     leads.map((lead, i) => leadToRow(lead, i)),
     leads.map((lead) => lead.id)
   );
 }
 
 export async function addLead(lead: Lead): Promise<void> {
-  const { error } = await supabase.from('mc_leads').insert(leadToRow(lead, -Date.now()) as any);
+  const { error } = await supabase.from('leads').insert(leadToRow(lead, -Date.now()) as any);
   if (error) throw error;
 }
 
 export async function loadLeads(): Promise<Lead[]> {
-  const rows = await fetchRows('mc_leads');
+  const rows = await fetchRows('leads');
   if (rows.length) return rows.map(rowToLead);
-  const seed = readLocal<Lead[]>('mc_leads') ?? INITIAL_LEADS;
+  const seed = readLocal<Lead[]>('leads') ?? INITIAL_LEADS;
   await saveLeads(seed);
   return seed;
 }
@@ -344,7 +344,7 @@ export async function loadBackofficeData(): Promise<BackofficeData> {
   const localSnapshot = hasMigrated()
     ? null
     : {
-        leads: readLocal<Lead[]>('mc_leads') ?? [],
+        leads: readLocal<Lead[]>('leads') ?? [],
         payments: readLocal<PaymentItem[]>('mc_payments') ?? [],
         contracts: readLocal<ContractItem[]>('mc_contracts') ?? [],
         settings: readLocal<Record<string, unknown>>('mc_settings')

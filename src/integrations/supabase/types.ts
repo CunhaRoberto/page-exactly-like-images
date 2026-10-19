@@ -110,7 +110,7 @@ export type Database = {
         }
         Relationships: []
       }
-      mc_leads: {
+      leads: {
         Row: {
           avatar_color: string
           avatar_text: string

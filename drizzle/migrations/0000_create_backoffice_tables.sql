@@ -1,6 +1,6 @@
 -- Memory Cream back-office: leads, pagamentos, contratos e configurações
 
-CREATE TABLE public.mc_leads (
+CREATE TABLE public.leads (
   id TEXT PRIMARY KEY,
   lead_code TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -84,9 +84,9 @@ CREATE TABLE public.mc_settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_leads TO anon;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_leads TO authenticated;
-GRANT ALL ON public.mc_leads TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.leads TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.leads TO authenticated;
+GRANT ALL ON public.leads TO service_role;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_payments TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_payments TO authenticated;
@@ -100,12 +100,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_settings TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.mc_settings TO authenticated;
 GRANT ALL ON public.mc_settings TO service_role;
 
-ALTER TABLE public.mc_leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mc_payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mc_contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mc_settings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "leads_full_access" ON public.mc_leads FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "leads_full_access" ON public.leads FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "payments_full_access" ON public.mc_payments FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "contracts_full_access" ON public.mc_contracts FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "settings_full_access" ON public.mc_settings FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
